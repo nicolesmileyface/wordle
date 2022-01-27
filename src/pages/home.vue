@@ -23,10 +23,10 @@
               v-for="(letter, i) in guess.letters"
               :key="[i, j, letter].join()"
               :class="{
-                'bg-gray-900 text-gray-300 bg-opacity-25': keyColors.guesses[j][letter.letter] === undefined,
-                'bg-teal-700 bg-opacity-90': keyColors.guesses[j][letter.letter] === 'pink',
-                'bg-yellow-500 bg-opacity-90': keyColors.guesses[j][letter.letter] === 'yellow',
-                'bg-black bg-opacity-90': keyColors.guesses[j][letter.letter] === 'black',
+                'bg-gray-900 text-gray-300 bg-opacity-25': keyColors.guesses[j][i] === undefined,
+                'bg-teal-700 bg-opacity-90': keyColors.guesses[j][i] === 'pink',
+                'bg-yellow-500 bg-opacity-90': keyColors.guesses[j][i] === 'yellow',
+                'bg-black bg-opacity-90': keyColors.guesses[j][i] === 'black',
               }"
             >
               {{ letter.letter || '' }}
@@ -189,6 +189,9 @@
         </button>
       </header>
       <p>you lost 😥</p>
+      <p>
+        word was: <span class="font-semibold">{{ word }}</span>
+      </p>
       <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
     </div>
   </button>
@@ -251,9 +254,12 @@ export default {
       }
       guesses.value[index].final = true
       guesses.value[index].letters.forEach((letter, i) => {
+        const totalLetterMatches = word.value.split('').filter((wordLetter) => letter.letter === wordLetter).length
+        const totalIndexMatches = word.value.split('').filter((wordLetter, i) => guesses.value[index].letters.map(({ letter }) => letter)[i] === wordLetter && letter.letter === wordLetter).length
+        const maxYellows = totalLetterMatches - totalIndexMatches
         if (letter.letter === word.value[i]) {
           letter.color = 'pink'
-        } else if (word.value.includes(letter.letter)) {
+        } else if (word.value.includes(letter.letter) && maxYellows > 0) {
           letter.color = 'yellow'
         } else {
           letter.color = 'black'
@@ -263,7 +269,7 @@ export default {
         } else if (keyColors.value.base[letter.letter] === 'yellow' && letter.color === 'pink') {
           keyColors.value.base[letter.letter] = letter.color
         }
-        keyColors.value.guesses[index][letter.letter] = letter.color
+        keyColors.value.guesses[index][i] = letter.color
       })
       if (guesses.value[index].letters.map(({ letter }) => letter).join('') === word.value) {
         results.value.solved = index
@@ -278,7 +284,7 @@ export default {
       if (!keys.flat(2).includes(key.toLowerCase())) {
         return
       }
-      if (keyColors.value.base[key] === 'black' || keyColors.value.guesses.some((guess) => guess[key] === 'black')) {
+      if (keyColors.value.base[key] === 'black') {
         return
       }
       if (results.value.solved > -1) {
