@@ -330,4 +330,7 @@ export default {
   user-select: none;
   padding-bottom: 100%;
 }
+button {
+  touch-action: manipulation;
+}
 </style>
