@@ -1,47 +1,30 @@
 <template>
-<div class="slider-wrapper">
-  <slot/>
-  <input 
-    type="range" 
-    class="slider" 
-    name="slider" 
-    id="slider" 
-    :min="min" 
-    :max="max" 
-    :step="step" 
-    v-model="val" 
-    @input="$emit('input', val)"
-  >
-</div>
+  <div class="slider-wrapper">
+    <slot />
+    <input type="range" class="slider" name="slider" id="slider" :min="min" :max="max" :step="step" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" />
+  </div>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      val: null
-    }
-  },
+  emits: ['update:modelValue'],
   props: {
     min: {
       type: null,
-      default: 0
+      default: 0,
     },
     max: {
       type: null,
-      default: 100
+      default: 100,
     },
     step: {
       type: null,
-      default: 1
+      default: 1,
     },
-    value: {
+    modelValue: {
       type: null,
-      default: 50
+      default: 50,
     },
-  },
-  mounted () {
-    this.val = this.value;
   },
 }
 </script>
@@ -51,8 +34,8 @@ export default {
   -webkit-appearance: none;
   appearance: none;
   opacity: 0.8;
-  transition: opacity .3s ease;
-  @apply block outline-none w-full h-2 bg-purple-800 my-2 rounded;
+  transition: opacity 0.3s ease;
+  @apply block outline-none w-full h-2 bg-gray-800 border border-gray-500 my-2 rounded;
 }
 .slider:hover {
   opacity: 1;
@@ -63,10 +46,10 @@ export default {
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  @apply thumb;
+  @apply w-3 h-3 bg-pink-500 rounded-full cursor-pointer;
 }
 .slider::-moz-range-thumb {
-  @apply thumb;
+  @apply w-3 h-3 bg-pink-500 rounded-full cursor-pointer;
 }
 .slider::-webkit-slider-thumb:hover {
   @apply bg-pink-300;

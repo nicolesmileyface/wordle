@@ -2,15 +2,7 @@
   <div class="flex flex-col items-center h-full space-y-8 bg-gradient-to-br from-[rgb(28,31,50)] to-gray-900">
     <main class="w-screen xs:max-w-screen-xs m-auto h-full grid grid-rows-[auto,1fr,auto]">
       <div class="relative">
-        <header class="flex items-center justify-between p-2 border-b border-gray-700 text-gray-500">
-          <button @click="() => (modals.help = true)">
-            <QuestionMarkCircleIcon class="w-6 h-6" />
-          </button>
-          <h1 class="text-2xl sm:text-4xl text-gray-200 font-black tracking-wider">FLEURDLE</h1>
-          <button @click="() => (modals.settings = true)">
-            <CogIcon class="w-6 h-6" />
-          </button>
-        </header>
+        <FLHeader @help="() => (modals.help = true)" @settings="() => (modals.settings = true)" />
         <div class="absolute w-full p-8" v-if="notInCorpus">
           <div class="p-4 rounded text-center w-full bg-gray-300 text-gray-900">not in word list</div>
         </div>
@@ -38,20 +30,7 @@
       <section class="shrink-0" v-if="!loading">
         <div class="space-y-2 py-3 px-2 w-full">
           <div class="flex w-full gap-1 xs:gap-1.5 justify-center">
-            <button
-              @click="() => keyPress(key)"
-              v-for="key in keys[0]"
-              :key="key"
-              class="text-xs sm:text-sm text-white flex items-center justify-center flex-1 py-5 rounded w-max uppercase font-black select-none"
-              :class="{
-                'bg-gray-700': keyColors.base[key] === undefined,
-                'bg-teal-700': keyColors.base[key] === 'pink',
-                'bg-yellow-500': keyColors.base[key] === 'yellow',
-                'bg-black': keyColors.base[key] === 'black',
-              }"
-            >
-              <kbd>{{ key }}</kbd>
-            </button>
+            <FLKey @click="keyPress(key)" v-for="key in keys[0]" :key="key" :value="key" :colors="keyColors.base" />
           </div>
           <div class="flex w-full gap-1 xs:gap-1.5 justify-center">
             <div style="flex: 0.5"></div>
@@ -98,19 +77,13 @@
     <pre class="overflow-scroll h-64 w-full"><code>results: {{results}}</code></pre>
     <pre class="overflow-scroll h-64 w-full"><code>guesses: {{guesses}}</code></pre>
   </div>
-  <button class="fixed w-screen h-screen overflow-auto inset-0 bg-opacity-25 bg-black backdrop-filter backdrop-blur p-8 xxs:pt-24 flex justify-center" v-if="modals.help" @click.self="() => (modals.help = false)">
-    <div class="bg-gray-800 rounded-md p-4 space-y-4 border-2 border-gray-700 shadow-xl">
-      <header class="flex justify-between items-center pb-2 border-b border-gray-500 text-gray-500">
-        <h2 class="text-xl sm:text-4xl text-gray-200 font-black tracking-wider text-left">HELP</h2>
-        <button @click="() => (modals.help = false)">
-          <XIcon class="w-6 h-6 text-orange-600" />
-        </button>
-      </header>
+  <div v-if="!loading">
+    <FLModal v-model:open="modals.help" title="HELP">
       <div class="space-y-2 text-sm xs:text-base text-left">
         <p>Guess the <span class="font-semibold">FLEURDLE</span> in {{ numGuesses }} tries.</p>
         <p>Each guess must be a valid {{ numLetters }} word. Hit the <kbd>enter</kbd> button to submit.</p>
         <p>After each guess, the color of the tiles will change to show how close your guess was to the word.</p>
-        <div class="w-full h-px bg-gray-500"></div>
+        <div class="w-full h-px bg-gray-600"></div>
         <p class="font-bold">Examples</p>
         <div class="space-y-2">
           <section class="flex gap-1">
@@ -143,16 +116,8 @@
           <p>The letter <kbd>U</kbd> is in not in the word in any spot</p>
         </div>
       </div>
-    </div>
-  </button>
-  <button class="fixed w-screen h-screen overflow-auto inset-0 bg-opacity-25 bg-black backdrop-filter backdrop-blur p-8 xxs:pt-24 flex justify-center" v-if="modals.settings" @click.self="() => (modals.settings = false)">
-    <div class="w-full max-w-md bg-gray-800 rounded-md p-4 space-y-4 border-2 border-gray-700 shadow-xl">
-      <header class="flex justify-between items-center pb-2 border-b border-gray-500 text-gray-500">
-        <h2 class="text-xl sm:text-4xl text-gray-200 font-black tracking-wider text-left">SETTINGS</h2>
-        <button @click="() => (modals.settings = false)">
-          <XIcon class="w-6 h-6 text-orange-600" />
-        </button>
-      </header>
+    </FLModal>
+    <FLModal v-model:open="modals.settings" title="SETTINGS">
       <label class="block text-left">
         <p>Letters</p>
         <select v-model="numLetters" class="appearance-none w-full px-2 py-1 rounded border border-gray-500 bg-transparent text-white">
@@ -166,46 +131,32 @@
         </select>
       </label>
       <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
-    </div>
-  </button>
-  <button class="fixed w-screen h-screen overflow-auto inset-0 bg-opacity-25 bg-blue-[rgb(20,128,188)] backdrop-filter backdrop-blur p-8 xxs:pt-24 flex justify-center" v-if="modals.won" @click.self="() => (modals.won = false)">
-    <div class="w-full max-w-md bg-gradient-to-br to-[#0c1e52] from-gray-800 rounded-md p-4 space-y-4 border-2 border-gray-700 shadow-xl">
-      <header class="flex justify-between items-center pb-2 border-b border-gray-500 text-gray-500">
-        <h2 class="text-xl sm:text-4xl text-gray-200 font-black tracking-wider text-left">CONGRATULATIONS</h2>
-        <button @click="() => (modals.won = false)">
-          <XIcon class="w-6 h-6 text-orange-600" />
-        </button>
-      </header>
+    </FLModal>
+    <FLModal v-model:open="modals.won" title="CONGRATULATIONS">
       <p>you won 🏆</p>
       <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
-    </div>
-  </button>
-  <button class="fixed w-screen h-screen overflow-auto inset-0 bg-opacity-25 bg-[rgb(57,02,02)] backdrop-filter backdrop-blur p-8 xxs:pt-24 flex justify-center" v-if="modals.lost" @click.self="() => (modals.lost = false)">
-    <div class="w-full max-w-md bg-gradient-to-br to-[#500d0d] from-gray-800 rounded-md p-4 space-y-4 border-2 border-gray-700 shadow-xl">
-      <header class="flex justify-between items-center pb-2 border-b border-gray-500 text-gray-500">
-        <h2 class="text-xl sm:text-4xl text-gray-200 font-black tracking-wider text-left">OOPS!</h2>
-        <button @click="() => (modals.lost = false)">
-          <XIcon class="w-6 h-6 text-orange-600" />
-        </button>
-      </header>
+    </FLModal>
+    <FLModal v-model:open="modals.lost" title="OOPS">
       <p>you lost 😥</p>
       <p>
         word was: <span class="font-semibold">{{ word }}</span>
       </p>
       <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
-    </div>
-  </button>
+    </FLModal>
+  </div>
 </template>
 
 <script>
 import words from '../assets/words/out'
-import { QuestionMarkCircleIcon, BackspaceIcon, XIcon } from '@heroicons/vue/outline'
-import { CogIcon } from '@heroicons/vue/solid'
+import FLHeader from '../components/FLHeader.vue'
+import FLModal from '../components/FLModal.vue'
+import FLKey from '../components/FLKey.vue'
+import { XIcon } from '@heroicons/vue/outline'
 import { onMounted, ref } from 'vue'
 
 export default {
   name: 'App',
-  components: { QuestionMarkCircleIcon, CogIcon, BackspaceIcon, XIcon },
+  components: { XIcon, FLHeader, FLModal, FLKey },
   setup() {
     const count = ref(0)
     const debugging = ref(false)

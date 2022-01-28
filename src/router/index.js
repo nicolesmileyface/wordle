@@ -1,6 +1,7 @@
 // https://next.router.vuejs.org/guide/migration/#removed-star-or-catch-all-routes
 import { createWebHistory, createRouter } from "vue-router";
 import Home from "../pages/home.vue";
+import Explore from "../pages/explore.vue";
 import NotFound from "../pages/not-found.vue";
 
 const routes = [
@@ -8,6 +9,11 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home,
+  },
+  {
+    path: "/explore",
+    name: "Explore",
+    component: Explore,
   },
   {
     path: "/:pathMatch(.*)*",
