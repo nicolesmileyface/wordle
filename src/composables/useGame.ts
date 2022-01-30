@@ -13,6 +13,7 @@ const _initKeys = (): Record<Letter, Color> => Object.fromEntries(flatKeys.filte
 type Color = 'gray' | 'black' | 'pink' | 'yellow'
 type Key = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' | 'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' | 'v' | 'b' | 'n' | 'm' | 'backspace' | 'enter'
 type Letter = Exclude<Key, 'enter' | 'backspace'>
+type Mode = 'freeplay' | 'daily' | 'puzzle'
 
 interface IState {
   cacheKey: number
@@ -48,8 +49,28 @@ interface IState {
   }
 }
 
-export const useGame = (storageKey='freeplay') => {
-  const localStorageKey = ['game-state', storageKey].join('-')
+export const useGame = (mode: Mode = 'freeplay') => {
+  const getWord = (): string => {
+    if(mode === 'daily') {
+      return getWordOfTheDay()
+    } else if (mode === 'freeplay') {
+      return state.corpus[Math.floor(Math.random() * state.corpus.length)]
+    } else {
+      return state.corpus[0]
+    }
+  }
+  const getWordOfTheDay = (): string => {
+    const now = new Date()
+    const start = new Date(2022, 0, 0)
+    const diff = Number(now) - Number(start)
+    let day = Math.floor(diff / (1000 * 60 * 60 * 24))
+    while (day > state.corpus.length) {
+      day -= state.corpus.length
+    }
+    return state.corpus[day]
+  }
+  
+  const localStorageKey = ['game-state', mode].join('-')
   const baseState: IState = {
     cacheKey: 1,
     inProgress: false,
@@ -93,7 +114,7 @@ export const useGame = (storageKey='freeplay') => {
     state.loading = true
     state.inProgress = true
     state.corpus = (words as { [key: number]: string[] })[state.numLetters]
-    state.word = state.corpus[Math.floor(Math.random() * state.corpus.length)]
+    state.word = getWord()
     state.guesses = Array.from({ length: state.numGuesses }).map(() => ({
       letters: Array.from({ length: state.word.length }).map(() => ({ letter: null, color: 'gray' })),
       final: false,
@@ -177,6 +198,15 @@ export const useGame = (storageKey='freeplay') => {
     debouncedUpdateStorage()
   }
 
+  const toEmojis = () => {
+    return state.guesses.map(guess => guess.letters.map(({ color }) => ({
+      'gray': '',
+      'black': '⬛️',
+      'pink': '🟩',
+      'yellow': '🟨',
+    }[color])).filter(a => !!a).join('')).filter(a => !!a).join('\n')
+  }
+
   onMounted(() => {
     document.addEventListener('keyup', (e) => {
       if ([state.modals.help, state.modals.settings, state.modals.won, state.modals.lost].some((v) => v)) {
@@ -189,7 +219,8 @@ export const useGame = (storageKey='freeplay') => {
     if(!state.inProgress || state.cacheKey !== baseState.cacheKey) {
       newGame(true)
     }
+    state.errors.notInCorpus = false
   })
 
-  return { keys, state, keyPress, newGame }
+  return { keys, state, keyPress, newGame, toEmojis }
 }

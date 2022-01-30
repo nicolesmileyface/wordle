@@ -2,6 +2,7 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Home from "../pages/home.vue";
 import Explore from "../pages/explore.vue";
+import Freeplay from "../pages/freeplay.vue";
 import NotFound from "../pages/not-found.vue";
 
 const routes = [
@@ -14,6 +15,11 @@ const routes = [
     path: "/explore",
     name: "Explore",
     component: Explore,
+  },
+  {
+    path: "/freeplay",
+    name: "Freeplay",
+    component: Freeplay,
   },
   {
     path: "/:pathMatch(.*)*",
