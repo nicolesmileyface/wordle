@@ -7,8 +7,8 @@
           <div class="p-4 rounded text-center w-full bg-gray-300 text-gray-900">not in word list</div>
         </div>
       </div>
-      <section class="p-6 flex items-center justify-center max-w-screen-xs w-full m-auto h-full overflow-auto" v-if="!loading">
-        <div class="grid gap-2 w-full px-8 xxs:px-2" :style="`grid-template-columns: repeat(${word.length}, minmax(0, 1fr));`">
+      <section class="p-6 flex justify-center max-w-screen-xs w-full m-auto h-full overflow-auto" v-if="!loading" :class="{ 'items-center': word && word.length > 3 }">
+        <div class="grid grid-flow-row-dense gap-2 px-8 xxs:px-2" :style="`grid-template-columns: repeat(${word.length}, minmax(0, 6rem));`">
           <template v-for="(guess, j) in guesses">
             <div
               class="square w-full border border-gray-700 rounded text-xl font-black text-white flex items-center justify-center"
@@ -28,46 +28,7 @@
       </section>
       <div v-else>loading...</div>
       <section class="shrink-0" v-if="!loading">
-        <div class="space-y-2 py-3 px-2 w-full">
-          <div class="flex w-full gap-1 xs:gap-1.5 justify-center">
-            <FLKey @click="keyPress(key)" v-for="key in keys[0]" :key="key" :value="key" :colors="keyColors.base" />
-          </div>
-          <div class="flex w-full gap-1 xs:gap-1.5 justify-center">
-            <div style="flex: 0.5"></div>
-            <button
-              @click="() => keyPress(key)"
-              v-for="key in keys[1]"
-              :key="key"
-              class="text-xs sm:text-sm text-white flex items-center justify-center flex-1 py-5 rounded w-max uppercase font-black select-none"
-              :class="{
-                'bg-gray-700': keyColors.base[key] === undefined,
-                'bg-teal-700': keyColors.base[key] === 'pink',
-                'bg-yellow-500': keyColors.base[key] === 'yellow',
-                'bg-black': keyColors.base[key] === 'black',
-              }"
-            >
-              <kbd>{{ key }}</kbd>
-            </button>
-            <div style="flex: 0.5"></div>
-          </div>
-          <div class="flex w-full gap-1 xs:gap-1.5 justify-center">
-            <button
-              @click="() => keyPress(key)"
-              v-for="key in keys[2]"
-              :key="key"
-              class="text-xs sm:text-sm text-white flex items-center justify-center flex-1 py-5 rounded w-max uppercase font-black select-none"
-              :class="{
-                'bg-gray-700': keyColors.base[key] === undefined,
-                'bg-teal-700': keyColors.base[key] === 'pink',
-                'bg-yellow-500': keyColors.base[key] === 'yellow',
-                'bg-black': keyColors.base[key] === 'black',
-              }"
-            >
-              <BackspaceIcon class="w-4 h-4 xs:w-6 xs:h-6" v-if="key === 'backspace'" />
-              <kbd v-else :class="{ 'px-0.5 xs:px-3 tracking-tight': key === 'enter' }">{{ key }}</kbd>
-            </button>
-          </div>
-        </div>
+        <FLKeyboard @input="(key) => keyPress(key)" :colors="keyColors.base" />
       </section>
     </main>
   </div>
@@ -150,13 +111,13 @@
 import words from '../assets/words/out'
 import FLHeader from '../components/FLHeader.vue'
 import FLModal from '../components/FLModal.vue'
-import FLKey from '../components/FLKey.vue'
+import FLKeyboard from '../components/FLKeyboard.vue'
 import { XIcon } from '@heroicons/vue/outline'
 import { onMounted, ref } from 'vue'
 
 export default {
   name: 'App',
-  components: { XIcon, FLHeader, FLModal, FLKey },
+  components: { XIcon, FLHeader, FLModal, FLKeyboard },
   setup() {
     const count = ref(0)
     const debugging = ref(false)
@@ -232,9 +193,6 @@ export default {
       }
     }
     const keyPress = (key) => {
-      if (!keys.flat(2).includes(key.toLowerCase())) {
-        return
-      }
       if (keyColors.value.base[key] === 'black') {
         return
       }
@@ -255,11 +213,7 @@ export default {
         guesses.value[index].letters[insertIndex].letter = key.toLowerCase()
       }
     }
-    const keys = [
-      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-      ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'backspace'],
-    ]
+
     onMounted(() => {
       document.addEventListener('keyup', (e) => {
         if ([modals.value.help, modals.value.settings, modals.value.won, modals.value.lost].some((v) => v)) {
@@ -269,12 +223,15 @@ export default {
       })
       newGame(true)
     })
-    return { count, keys, guesses, word, keyPress, results, keyColors, debugging, modals, numLetters, numGuesses, loading, notInCorpus, newGame }
+    return { count, guesses, word, keyPress, results, keyColors, debugging, modals, numLetters, numGuesses, loading, notInCorpus, newGame }
   },
 }
 </script>
 
 <style scoped lang="postcss">
+.square {
+  height: max-content;
+}
 .square:after {
   content: '';
   display: block;

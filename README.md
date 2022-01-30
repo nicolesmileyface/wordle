@@ -1,6 +1,9 @@
 # wordle
 wordle  guy
 
+## TODO:
+- put game in one object for localStorage
+
 
 ## how wordle works
 - all black squares

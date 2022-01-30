@@ -1,27 +1,47 @@
 <template>
   <FLDefaultLayout items="start">
     <template #header>
-      <header class="flex items-center justify-center p-2 border-b border-gray-700 text-gray-500">
+      <header class="flex items-center justify-between p-2 border-b border-gray-700 text-gray-500">
         <h1 class="text-2xl sm:text-4xl text-gray-200 font-black tracking-wider text-center">EXPLORE</h1>
+        <router-link to="/">
+          <HomeIcon class="w-6 h-6" />
+        </router-link>
       </header>
     </template>
     <template #content>
       <div class="grid gap-4 w-full">
         <label class="block space-y-1 w-full">
-          <p>Search Term</p>
-          <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="search.term" />
-        </label>
-        <label class="block space-y-1 w-full">
           <p>Number of Letters: {{ search.numLetters }}</p>
           <Slider :min="2" :max="15" :step="1" v-model="search.numLetters" />
         </label>
         <label class="block space-y-1 w-full">
-          <p>Tolerance: {{ search.tolerance }}</p>
-          <Slider :min="1" :max="search.numLetters" :step="1" v-model="search.tolerance" />
+          <p>Search Term</p>
+          <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="search.term" />
         </label>
+        <label class="block space-y-1 w-full">
+          <p>Not Allowed</p>
+          <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="search.notAllowed" />
+        </label>
+        <div class="space-y-2">
+          <label class="block space-y-1 w-full">
+            <p>Word Like:</p>
+            <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="search.isLike" />
+          </label>
+          <p class="text-xs text-gray-500">Enter a word with periods representing unknown letters</p>
+        </div>
+        <div class="space-y-2">
+          <label class="block space-y-1 w-full">
+            <p>Word Has:</p>
+            <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="search.has" />
+          </label>
+          <p class="text-xs text-gray-500">Enter a letters in word with unknown position</p>
+        </div>
         <div class="grid grid-cols-3 gap-2">
           <div v-for="match in matches" :key="match.word" class="bg-gray-700 p-1 rounded">
-            {{ match }}
+            <p>
+              {{ match.word }}
+            </p>
+            <p class="text-xs text-gray-500">score: {{ match.score }}</p>
           </div>
         </div>
       </div>
@@ -35,28 +55,58 @@ import words from '../assets/words/out'
 import { computed, reactive } from '@vue/reactivity'
 import FLDefaultLayout from '../components/FLDefaultLayout.vue'
 import Slider from '../components/basic/Slider.vue'
+import { HomeIcon } from '@heroicons/vue/outline'
 export default {
   name: 'Explore',
-  components: { FLDefaultLayout, Slider },
+  components: { FLDefaultLayout, Slider, HomeIcon },
   setup() {
     // sort out blacklist
     const search = reactive({
       term: '',
-      numLetters: 6,
-      tolerance: 5,
+      numLetters: 5,
+      notAllowed: '',
+      isLike: '',
+      has: '',
     })
-    const matches = computed(() =>
-      words[search.numLetters]
+    const aboveLetterTolerance = (letter, word) => {
+      const inWord = word
+        .split('')
+        .map((a) => a === letter)
+        .filter((a) => !!a)
+      const inSearchTerm = search.term
+        .split('')
+        .map((a) => a === letter)
+        .filter((a) => !!a)
+      return inWord > inSearchTerm
+    }
+
+    const matches = computed(() => {
+      const notAllowed = search.notAllowed
+        .toLowerCase()
+        .split('')
+        .filter((e) => !!e)
+      const knownIndices = search.isLike
+        .split('')
+        .map((letter, index) => (letter !== '.' ? { letter, index } : null))
+        .filter((a) => a !== null)
+      const has = search.has.split('')
+      return words[search.numLetters]
         .map((word) => {
           const score = levenshtein.get(word, search.term)
-          if (score > search.tolerance) {
+          if (notAllowed.some((letter) => aboveLetterTolerance(letter, word))) {
+            return null
+          }
+          if (has.some((letter) => !word.includes(letter))) {
+            return null
+          }
+          if (knownIndices.length > 0 && knownIndices.filter(({ letter, index }) => word.charAt(index) === letter).length < knownIndices.length) {
             return null
           }
           return { score, word }
         })
         .filter((a) => a !== null)
         .sort((a, b) => a.score - b.score)
-    )
+    })
     return { search, matches }
   },
 }
