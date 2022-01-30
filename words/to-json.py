@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 results = {}
 
@@ -11,10 +12,11 @@ with open('./popular.txt', 'r') as f:
             else:
                 results[str(len(word))].append(word)
 
-# for k, v in results.items():
-    # if len(v) > int(k):
-    #     with open('./'+k+'.json', 'w') as f:
-    #         json.dump(v, f)
+trimmed_results = deepcopy(results)
+
+for k, v in results.items():
+    if len(v) <= int(k):
+        del trimmed_results[k]
 
 with open('./out.json', 'w') as f:
-    json.dump(results, f)
+    json.dump(trimmed_results, f, indent=2)

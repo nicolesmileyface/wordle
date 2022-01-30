@@ -51,7 +51,7 @@
 
 <script>
 import levenshtein from 'fast-levenshtein'
-import words from '../assets/words/out'
+import words from '../assets/words.json'
 import { computed, reactive } from '@vue/reactivity'
 import FLDefaultLayout from '../components/FLDefaultLayout.vue'
 import Slider from '../components/basic/Slider.vue'

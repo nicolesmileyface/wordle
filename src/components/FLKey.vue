@@ -3,10 +3,10 @@
     @click="$emit('click', value)"
     class="text-xs sm:text-sm text-white flex items-center justify-center flex-1 py-5 rounded w-max uppercase font-black select-none"
     :class="{
-      'bg-gray-700': colors[value] === undefined,
+      'bg-gray-700': colors[value] === undefined || colors[value] === 'gray',
       'bg-teal-700': colors[value] === 'pink',
       'bg-yellow-500': colors[value] === 'yellow',
-      'bg-black': colors[value] === 'black',
+      'text-orange-800 font-semibold text-opacity-30 cursor-not-allowed': colors[value] === 'black',
     }"
   >
     <BackspaceIcon class="w-4 h-4 xs:w-6 xs:h-6" v-if="value === 'backspace'" />
