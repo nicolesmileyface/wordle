@@ -226,8 +226,8 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
     }
     const sorted = streaks.all.sort((a, b) => (Number(a.end) - Number(a.start)) - (Number(b.end) - Number(b.start)))
     const current = streaks.all.find(a => Number(a.end) === state.day)
-    streaks.longest = Number(sorted[0].end) - Number(sorted[0].start)
-    streaks.current = current ? Number(current.end) - Number(current.start) : 0
+    streaks.longest = (Number(sorted[0].end) - Number(sorted[0].start)) + 1
+    streaks.current = current ? (Number(current.end) - Number(current.start)) + 1 : 0
     return { ...streaks, sorted }
   }
 
