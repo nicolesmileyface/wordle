@@ -89,7 +89,7 @@
           <label class="block text-left">
             <p>Letters</p>
             <select v-model="state.numLetters" class="appearance-none w-full px-2 py-1 rounded border border-gray-500 bg-transparent text-white">
-              <option :value="i" v-for="i in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]" :key="i">{{ i }}</option>
+              <option :value="i" v-for="i in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]" :key="i">{{ i }}{{ mode === 'daily' ? (state.history[`${i}`][`${state.day}`] == null || state.history[`${i}`][`${state.day}`] == HAS_TOUCHED ? '' : ' - completed') : '' }}</option>
             </select>
           </label>
           <label class="block text-left">
@@ -101,7 +101,8 @@
               <option :value="i + 1" v-for="(_, i) in Array.from({ length: 15 })" :key="i">{{ i + 1 }}</option>
             </select>
           </label>
-          <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
+          <button class="w-full bg-teal-700 px-2 py-2 rounded shadow cursor-not-allowed opacity-40" v-if="mode === 'daily' && state.history[`${state.numLetters}`][`${state.day}`] != null && state.history[`${state.numLetters}`][`${state.day}`] > HAS_TOUCHED">new game</button>
+          <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()" v-else>new game</button>
         </slot>
       </FLModal>
       <FLModal v-model:open="state.modals.won" title="CONGRATULATIONS">
@@ -114,7 +115,7 @@
         <slot name="modal-lost">
           <p>you lost 😥</p>
           <p>
-            word was: <span class="font-semibold">{{ word }}</span>
+            word was: <span class="font-semibold">{{ state.word }}</span>
           </p>
           <button class="w-full bg-teal-700 px-2 py-2 rounded shadow" @click.stop="() => newGame()">new game</button>
         </slot>
@@ -131,6 +132,7 @@ import FLModal from '../components/FLModal.vue'
 import FLKeyboard from '../components/FLKeyboard.vue'
 import { XIcon } from '@heroicons/vue/outline'
 import { useGame } from '../composables/useGame'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'FLGame',
@@ -142,8 +144,9 @@ export default {
   },
   components: { XIcon, FLHeader, FLModal, FLKeyboard, FLDefaultLayout },
   setup(props) {
-    const { keys, state, keyPress, newGame, toEmojis } = useGame(props.mode)
-    return { keys, state, keyPress, newGame, toEmojis }
+    const route = useRoute()
+    const { keys, state, keyPress, newGame, toEmojis, getStreak, canStartNewGame, HAS_TOUCHED } = useGame(props.mode, route.query && route.query.day && !isNaN(Number(route.query.day)) ? Math.floor(Number(route.query.day)) : null)
+    return { keys, state, keyPress, newGame, toEmojis, getStreak, canStartNewGame, HAS_TOUCHED }
   },
 }
 </script>

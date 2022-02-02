@@ -10,9 +10,11 @@
     </template>
     <template #content>
       <div class="grid gap-4 w-full">
-        <label class="block space-y-1 w-full">
-          <p>Number of Letters: {{ search.numLetters }}</p>
-          <Slider :min="2" :max="15" :step="1" v-model="search.numLetters" />
+        <label class="block space-y-1 text-left">
+          <p>Number of Letters</p>
+          <select v-model="search.numLetters" class="appearance-none w-full px-2 py-2 rounded border border-gray-500 bg-transparent text-white">
+            <option :value="i" v-for="i in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]" :key="i">{{ i }}</option>
+          </select>
         </label>
         <label class="block space-y-1 w-full">
           <p>Search Term</p>
@@ -60,6 +62,7 @@ export default {
   name: 'Explore',
   components: { FLDefaultLayout, Slider, HomeIcon },
   setup() {
+    const sortedWords = Object.fromEntries(Object.entries(words).map(([numLetters, words]) => [numLetters, words.sort((a, b) => a.localeCompare(b))]))
     // sort out blacklist
     const search = reactive({
       term: '',
@@ -90,7 +93,7 @@ export default {
         .map((letter, index) => (letter !== '.' ? { letter, index } : null))
         .filter((a) => a !== null)
       const has = search.has.split('')
-      return words[search.numLetters]
+      return sortedWords[search.numLetters]
         .map((word) => {
           const score = levenshtein.get(word, search.term)
           if (notAllowed.some((letter) => aboveLetterTolerance(letter, word))) {

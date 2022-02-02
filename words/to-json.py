@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from random import shuffle
 
 results = {}
 
@@ -17,6 +18,8 @@ trimmed_results = deepcopy(results)
 for k, v in results.items():
     if len(v) <= int(k):
         del trimmed_results[k]
+    else:
+        shuffle(trimmed_results[k])
 
 with open('./out.json', 'w') as f:
     json.dump(trimmed_results, f, indent=2)
