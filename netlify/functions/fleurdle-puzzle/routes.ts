@@ -15,6 +15,10 @@ const Puzzle = mongoose.model('Puzzle', new Schema({
   puzzle: Array,
 }))
 
+router.get('/health', async (req, res) => {
+  res.send('hello world')
+})
+
 router.get('/puzzles', async (req, res) => {
   try {
     const puzzles = await Puzzle.find()

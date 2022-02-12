@@ -8,8 +8,6 @@ const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(helmet())
-
-require('./db')
 app.use('/api', router)
 
 export default app
