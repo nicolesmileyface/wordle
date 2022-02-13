@@ -1,6 +1,6 @@
 import { useDebounceFn } from '@vueuse/core'
 import words from '../assets/words.json'
-import { computed, onMounted, reactive, UnwrapRef } from "vue"
+import { computed, onMounted, reactive, UnwrapRef } from 'vue'
 
 const keys: Key[][] = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -8,7 +8,7 @@ const keys: Key[][] = [
   ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'backspace'],
 ]
 const flatKeys = keys.flat()
-const _initKeys = (): Record<Letter, Color> => Object.fromEntries(flatKeys.filter(key => !['backspace', 'enter'].includes(key)).map((key: any) => [key, 'gray']))
+const _initKeys = (): Record<Letter, Color> => Object.fromEntries(flatKeys.filter((key) => !['backspace', 'enter'].includes(key)).map((key: any) => [key, 'gray']))
 const HAS_TOUCHED = -7777777
 
 type Color = 'gray' | 'black' | 'pink' | 'yellow'
@@ -25,45 +25,45 @@ interface IState {
   word: string
   results: {
     solved: number
-  },
+  }
   guesses: {
     final: boolean
     letters: {
       letter: Letter | null
       color: Color
     }[]
-  }[],
+  }[]
   keyColors: {
-    base: Record<Letter, Color>,
-    guesses: Color[][],
-  },
-  loading: boolean,
-  corpus: string[],
+    base: Record<Letter, Color>
+    guesses: Color[][]
+  }
+  loading: boolean
+  corpus: string[]
   modals: {
     help: boolean
     settings: boolean
     won: boolean
     lost: boolean
-  },
+  }
   errors: {
     notInCorpus: boolean
-  },
-  day: number,
+  }
+  day: number
   history: {
     [numLetters: string]: {
       [day: string]: number
     }
-  },
+  }
 }
 
-export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null, slug=null, puzzleIndex=null) => {
+export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null, slug = null, puzzleIndex = null) => {
   const now = new Date()
   const start = new Date(2022, 0, 0)
   const diff = Number(now) - Number(start)
-  const day = dayParam !== null && dayParam >= 0 ? dayParam: Math.floor(diff / (1000 * 60 * 60 * 24))
+  const day = dayParam !== null && dayParam >= 0 ? dayParam : Math.floor(diff / (1000 * 60 * 60 * 24))
 
   const getWord = (): string => {
-    if(mode === 'daily') {
+    if (mode === 'daily') {
       state.numGuesses = 6
       return getWordOfTheDay()
     } else if (mode === 'freeplay') {
@@ -82,8 +82,8 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
     }
     return state.corpus[index]
   }
-  
-  const localStorageKey = ['game-state', mode, slug, puzzleIndex].filter(a => a !== null).join('-')
+
+  const localStorageKey = ['game-state', mode, slug, puzzleIndex].filter((a) => a !== null).join('-')
   const baseState: IState = {
     cacheKey: 3,
     inProgress: false,
@@ -92,12 +92,12 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
     numGuesses: 6,
     word: '',
     results: {
-      solved: -1
+      solved: -1,
     },
     guesses: [],
     keyColors: {
       base: _initKeys(),
-      guesses: Array.from({ length: 6 }).map(() => Array.from({ length: 5 }))
+      guesses: Array.from({ length: 6 }).map(() => Array.from({ length: 5 })),
     },
     loading: true,
     corpus: [],
@@ -108,16 +108,16 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
       lost: false,
     },
     errors: {
-      notInCorpus: false
+      notInCorpus: false,
     },
     day: day,
-    history: Object.fromEntries([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20].map(num => [`${num}`, {}]))
+    history: Object.fromEntries([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20].map((num) => [`${num}`, {}])),
   }
   const fromLocalStorage = (): IState => {
     const gameState = localStorage.getItem(localStorageKey)
-    if(gameState) {
+    if (gameState) {
       const parsed = JSON.parse(gameState)
-      if(parsed.cacheKey !== baseState.cacheKey || parsed.day !== baseState.day) {
+      if (parsed.cacheKey !== baseState.cacheKey || parsed.day !== baseState.day) {
         return { ...parsed, ...baseState, history: parsed.history }
       }
       return parsed
@@ -131,13 +131,13 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
   const state: UnwrapRef<IState> = reactive(fromLocalStorage())
 
   const newGame = async (showHelp = false) => {
-    if(mode === 'puzzle') {
+    if (mode === 'puzzle') {
       state.numLetters = getWord().length as any
     }
     localStorage.removeItem(localStorageKey)
     state.loading = true
     state.inProgress = true
-    if(mode === 'daily') {
+    if (mode === 'daily') {
       state.history[`${state.numLetters}`][`${state.day}`] = HAS_TOUCHED
     }
     state.corpus = (words as { [key: number]: string[] })[state.numLetters]
@@ -174,7 +174,9 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
     updateStorage()
     state.guesses[index].final = true
     state.guesses[index].letters.forEach((letter, i) => {
-      if(letter.letter === null) { throw new Error('letter is null') }
+      if (letter.letter === null) {
+        throw new Error('letter is null')
+      }
       const totalLetterMatches = state.word.split('').filter((wordLetter) => letter.letter === wordLetter).length
       const totalIndexMatches = state.word.split('').filter((wordLetter, i) => state.guesses[index].letters.map(({ letter }) => letter)[i] === wordLetter && letter.letter === wordLetter).length
       const maxYellows = totalLetterMatches - totalIndexMatches
@@ -195,9 +197,9 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
     if (state.guesses[index].letters.map(({ letter }) => letter).join('') === state.word) {
       state.results.solved = index
       state.modals.won = true
-      if(mode === 'daily') {
+      if (mode === 'daily') {
         console.log({ history: state.history, day: state.day, dayParam, existingRecord: state.history[`${state.numLetters}`][`${state.day}`] })
-        if(state.history[`${state.numLetters}`][`${state.day}`] == null || state.history[`${state.numLetters}`][`${state.day}`] == HAS_TOUCHED) {
+        if (state.history[`${state.numLetters}`][`${state.day}`] == null || state.history[`${state.numLetters}`][`${state.day}`] == HAS_TOUCHED) {
           state.history[`${state.numLetters}`][`${state.day}`] = index
         }
       }
@@ -209,8 +211,8 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
       return
     }
     if (index === state.numGuesses - 1) {
-      if(mode === 'daily') {
-        if(state.history[`${state.numLetters}`][`${state.day}`] == null || state.history[`${state.numLetters}`][`${state.day}`] == HAS_TOUCHED) {
+      if (mode === 'daily') {
+        if (state.history[`${state.numLetters}`][`${state.day}`] == null || state.history[`${state.numLetters}`][`${state.day}`] == HAS_TOUCHED) {
           state.history[state.numLetters][state.day] = -1
         }
       }
@@ -225,27 +227,26 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
 
   const getStreak = () => {
     const streaks: {
-      all: { start: string, end: string }[],
-      longest: number,
+      all: { start: string; end: string }[]
+      longest: number
       current: number
     } = {
       all: [],
       longest: 0,
-      current: 0
+      current: 0,
     }
     for (const [day, index] of Object.entries(state.history[state.numLetters])) {
-      const indexOfCurrentStreak = streaks.all.findIndex(a => Number(a.end) === Number(day) - 1)
-      if(index > -1 && indexOfCurrentStreak > -1) {
+      const indexOfCurrentStreak = streaks.all.findIndex((a) => Number(a.end) === Number(day) - 1)
+      if (index > -1 && indexOfCurrentStreak > -1) {
         streaks.all[indexOfCurrentStreak].end = day
-      }
-      else if(index > -1 && !streaks.all.some(a => a.start === day)) {
+      } else if (index > -1 && !streaks.all.some((a) => a.start === day)) {
         streaks.all.push({ start: day, end: day })
       }
     }
-    const sorted = streaks.all.sort((a, b) => (Number(a.end) - Number(a.start)) - (Number(b.end) - Number(b.start)))
-    const current = streaks.all.find(a => Number(a.end) === state.day)
-    streaks.longest = (Number(sorted[0].end) - Number(sorted[0].start)) + 1
-    streaks.current = current ? (Number(current.end) - Number(current.start)) + 1 : 0
+    const sorted = streaks.all.sort((a, b) => Number(a.end) - Number(a.start) - (Number(b.end) - Number(b.start)))
+    const current = streaks.all.find((a) => Number(a.end) === state.day)
+    streaks.longest = Number(sorted[0].end) - Number(sorted[0].start) + 1
+    streaks.current = current ? Number(current.end) - Number(current.start) + 1 : 0
     return { ...streaks, sorted }
   }
 
@@ -267,18 +268,29 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
     } else if (key === 'enter' && insertIndex === -1) {
       guess(index)
     } else if (key !== 'enter' && insertIndex > -1) {
-      state.guesses[index].letters[insertIndex].letter = (key.toLowerCase() as Letter)
+      state.guesses[index].letters[insertIndex].letter = key.toLowerCase() as Letter
     }
     debouncedUpdateStorage()
   }
 
   const toEmojis = () => {
-    return state.guesses.map(guess => guess.letters.map(({ color }) => ({
-      'gray': '',
-      'black': '⬛️',
-      'pink': '🟩',
-      'yellow': '🟨',
-    }[color])).filter(a => !!a).join('')).filter(a => !!a).join('\n')
+    return state.guesses
+      .map((guess) =>
+        guess.letters
+          .map(
+            ({ color }) =>
+              ({
+                gray: '',
+                black: '⬛️',
+                pink: '🟩',
+                yellow: '🟨',
+              }[color])
+          )
+          .filter((a) => !!a)
+          .join('')
+      )
+      .filter((a) => !!a)
+      .join('\n')
   }
 
   onMounted(() => {
@@ -286,11 +298,11 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null,
       if ([state.modals.help, state.modals.settings, state.modals.won, state.modals.lost].some((v) => v)) {
         return
       }
-      if((flatKeys as String[]).includes(e.key.toLowerCase())) {
-        keyPress((e.key.toLowerCase() as Key))
+      if ((flatKeys as String[]).includes(e.key.toLowerCase())) {
+        keyPress(e.key.toLowerCase() as Key)
       }
     })
-    if(!state.inProgress || state.cacheKey !== baseState.cacheKey || state.day !== baseState.day) {
+    if (!state.inProgress || state.cacheKey !== baseState.cacheKey || state.day !== baseState.day) {
       newGame(true)
     }
     state.errors.notInCorpus = false

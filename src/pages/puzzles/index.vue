@@ -7,7 +7,7 @@
         </router-link>
         <h1 class="text-2xl sm:text-4xl text-gray-200 font-black tracking-wider text-center">Puzzles</h1>
         <router-link to="/puzzles/editor">
-          <PencilAltIcon class="w-6 h-6 animate-pulse" />
+          <PencilAltIcon class="w-6 h-6 text-teal-500" />
         </router-link>
       </header>
     </template>

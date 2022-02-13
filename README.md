@@ -1,27 +1,31 @@
-# wordle
-wordle  guy
+## fleurdle
 
-## TODO:
-- put game in one object for localStorage
+I never really played wordle, but my girlfriend loves it and wanted to be able to play more than one word a day. I love her, and it didn't seem too complicated, so I put my CS degree to work 👩‍💻. We'll call it \_fleur_dle 🌻
 
+## Features
 
-## how wordle works
-- all black squares
-- 5 letter words
-- 6 tries
-- right letter right place = green
-- right letter wrong place = yellow
-- wrong letter = gray
-- one word a day (mean, not good for wives)
-- guesses have to be in corpus
-- fake keyboard, colored keys on bottom (prob still works with keyboard input on desktop)
+- varying word lengths:
+  - allow 2-15 letter words (turns out long words are hard!!)
+- daily mode:
+  - users can play one fleurdle a day for all the available word lengths
+  - include emoji output that users can share or copy to their clipboard
+  - display current streak
+  - display longest streak
+- freeplay mode:
+  - users can play infinitely
+  - no emoji sharing enabled (don't want to confuse with daily mode)
+- puzzle mode:
+  - users can make puzzles (sequence of fleurdles that users can write messages with)
+  - puzzles can be public (appear on main puzzle page) or private (only accessible with link)
+  - users can add title/author/description to their puzzles
+  - users can choose whether or not an elligible word is a fleurdle or is plain text
+- explore page
+  - users can explore the corpus (pretty cheat-y)
+  - users can filter words based off of patterns, allowed letters, disallowed letters
 
-## what i wanna do
-- same thing as wordle
-- base one word a day per number of letters
-- practice mode has more words a day
-- support for more guesses
-- support for different amount of letters
-- not green bc that's stupid. girls like pink and orange 🥰
-- user authentication
-- send a user a puzzle (collection of words)
+## Tech Stack
+
+- vue 3
+- tailwind 3
+- mongo (compass)
+- netlify functions (with typescript)

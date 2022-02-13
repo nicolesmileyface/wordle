@@ -3,11 +3,7 @@
     "target": "ES2018",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "lib": [
-      "ESNext",
-      "ESNext.AsyncIterable",
-      "DOM"
-    ],
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -17,19 +13,10 @@
     "experimentalDecorators": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
-    },
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
+    }
   },
-  "types": [
-    "@types/node"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "types": ["@types/node"],
+  "exclude": ["node_modules", "dist"]
 }
