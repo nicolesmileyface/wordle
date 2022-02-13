@@ -56,7 +56,7 @@ interface IState {
   },
 }
 
-export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null) => {
+export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null, slug=null, puzzleIndex=null) => {
   const now = new Date()
   const start = new Date(2022, 0, 0)
   const diff = Number(now) - Number(start)
@@ -68,7 +68,10 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
       return getWordOfTheDay()
     } else if (mode === 'freeplay') {
       return state.corpus[Math.floor(Math.random() * state.corpus.length)]
+    } else if (slug !== null) {
+      return JSON.parse(localStorage.getItem(`puzzle-${slug}`))[puzzleIndex].word
     } else {
+      console.log('something went wrong')
       return state.corpus[0]
     }
   }
@@ -80,7 +83,7 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
     return state.corpus[index]
   }
   
-  const localStorageKey = ['game-state', mode].join('-')
+  const localStorageKey = ['game-state', mode, slug, puzzleIndex].filter(a => a !== null).join('-')
   const baseState: IState = {
     cacheKey: 3,
     inProgress: false,
@@ -128,10 +131,15 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
   const state: UnwrapRef<IState> = reactive(fromLocalStorage())
 
   const newGame = async (showHelp = false) => {
+    if(mode === 'puzzle') {
+      state.numLetters = getWord().length as any
+    }
     localStorage.removeItem(localStorageKey)
     state.loading = true
     state.inProgress = true
-    state.history[`${state.numLetters}`][`${state.day}`] = HAS_TOUCHED
+    if(mode === 'daily') {
+      state.history[`${state.numLetters}`][`${state.day}`] = HAS_TOUCHED
+    }
     state.corpus = (words as { [key: number]: string[] })[state.numLetters]
     state.word = getWord()
     state.guesses = Array.from({ length: state.numGuesses }).map(() => ({
@@ -146,7 +154,7 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
       solved: -1,
     }
     state.modals = {
-      help: showHelp,
+      help: mode === 'puzzle' ? false : showHelp,
       settings: false,
       won: false,
       lost: false,
@@ -193,6 +201,11 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
           state.history[`${state.numLetters}`][`${state.day}`] = index
         }
       }
+      if (mode === 'puzzle') {
+        const progress = JSON.parse(localStorage.getItem(`puzzle-${slug}`))
+        progress[puzzleIndex].solved = true
+        localStorage.setItem(`puzzle-${slug}`, JSON.stringify(progress))
+      }
       return
     }
     if (index === state.numGuesses - 1) {
@@ -200,6 +213,11 @@ export const useGame = (mode: Mode = 'freeplay', dayParam: number | null = null)
         if(state.history[`${state.numLetters}`][`${state.day}`] == null || state.history[`${state.numLetters}`][`${state.day}`] == HAS_TOUCHED) {
           state.history[state.numLetters][state.day] = -1
         }
+      }
+      if (mode === 'puzzle') {
+        const progress = JSON.parse(localStorage.getItem(`puzzle-${slug}`))
+        progress[puzzleIndex].solved = true
+        localStorage.setItem(`puzzle-${slug}`, JSON.stringify(progress))
       }
       state.modals.lost = true
     }

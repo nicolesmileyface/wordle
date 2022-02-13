@@ -5,7 +5,9 @@
         <button @click="$emit('help')">
           <QuestionMarkCircleIcon class="w-6 h-6" />
         </button>
-        <div class="w-6"></div>
+        <router-link to="/puzzles">
+          <PuzzleIcon class="w-6 h-6" />
+        </router-link>
       </div>
       <h1 class="text-2xl sm:text-4xl text-gray-200 font-black tracking-wider">FLEURDLE</h1>
       <div class="flex space-x-4">
@@ -24,7 +26,7 @@
 </template>
 
 <script>
-import { QuestionMarkCircleIcon, BookOpenIcon } from '@heroicons/vue/outline'
+import { QuestionMarkCircleIcon, BookOpenIcon, PuzzleIcon } from '@heroicons/vue/outline'
 import { CogIcon } from '@heroicons/vue/solid'
 export default {
   name: 'FLHeader',
@@ -35,6 +37,6 @@ export default {
     },
   },
   emits: ['help', 'settings'],
-  components: { QuestionMarkCircleIcon, CogIcon, BookOpenIcon },
+  components: { QuestionMarkCircleIcon, CogIcon, BookOpenIcon, PuzzleIcon },
 }
 </script>

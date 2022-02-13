@@ -1,10 +1,12 @@
 <template>
   <FLDefaultLayout :items="state.word && state.word.length > 3 && state.numGuesses < 8 ? 'center' : 'start'" :loading="state.loading" :key="mode">
     <template #header>
-      <FLHeader @help="() => (state.modals.help = true)" @settings="() => (state.modals.settings = true)" :mode="mode" />
-      <div class="absolute w-full p-8" v-if="state.errors.notInCorpus">
-        <div class="error p-4 rounded-md text-center w-full bg-gray-500 border-2 border-gray-700 border-opacity-20 bg-opacity-20 backdrop-filter backdrop-blur text-xl sm:text-2xl text-orange-500 font-semibold">not in word list</div>
-      </div>
+      <slot name="header">
+        <FLHeader @help="() => (state.modals.help = true)" @settings="() => (state.modals.settings = true)" :mode="mode" />
+        <div class="absolute w-full p-8" v-if="state.errors.notInCorpus">
+          <div class="error p-4 rounded-md text-center w-full bg-gray-500 border-2 border-gray-700 border-opacity-20 bg-opacity-20 backdrop-filter backdrop-blur text-xl sm:text-2xl text-orange-500 font-semibold">not in word list</div>
+        </div>
+      </slot>
     </template>
     <template #content>
       <div class="grid grid-flow-row-dense w-full justify-center" :class="{ 'gap-2 px-8 xxs:px-2': state.word.length < 12, 'gap-1 px-2 sm:gap-2': state.word.length >= 12 }" :style="`grid-template-columns: repeat(${state.word.length}, minmax(0, ${state.word.length > 4 ? `calc((100% * ${1 / state.word.length}) - ${state.word.length >= 12 ? 0.25 : 0.5}rem)` : '4rem'})); grid-auto-rows: min-content;`">
@@ -145,7 +147,7 @@ export default {
   components: { XIcon, FLHeader, FLModal, FLKeyboard, FLDefaultLayout },
   setup(props) {
     const route = useRoute()
-    const { keys, state, keyPress, newGame, toEmojis, getStreak, canStartNewGame, HAS_TOUCHED } = useGame(props.mode, route.query && route.query.day && !isNaN(Number(route.query.day)) ? Math.floor(Number(route.query.day)) : null)
+    const { keys, state, keyPress, newGame, toEmojis, getStreak, canStartNewGame, HAS_TOUCHED } = useGame(props.mode, route.query && route.query.day && !isNaN(Number(route.query.day)) ? Math.floor(Number(route.query.day)) : null, route.params?.slug || null, route.params?.id || null)
     return { keys, state, keyPress, newGame, toEmojis, getStreak, canStartNewGame, HAS_TOUCHED }
   },
 }
