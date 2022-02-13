@@ -1,6 +1,6 @@
 ## fleurdle
 
-I never really played wordle, but my girlfriend loves it and wanted to be able to play more than one word a day. I love her, and it didn't seem too complicated, so I put my CS degree to work 👩‍💻. We'll call it \_fleur_dle 🌻
+I never really played wordle, but my girlfriend loves it and wanted to be able to play more than one word a day. I love her, and it didn't seem too complicated, so I put my CS degree to work 👩‍💻. We'll call it *fleur*dle 🌻
 
 ## Features
 
