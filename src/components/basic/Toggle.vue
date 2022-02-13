@@ -1,45 +1,22 @@
 <template>
-<div class="switch-wrapper">
-  <slot/>
-  <label for="switch" class="switch-label" :class="{'active': value}">
-    <div class="switch-button"></div>
-  </label>
-  <input type="checkbox" class="switch" name="switch" id="switch" :value="value" @input="$emit('input', !value)">
-</div>
+  <div class="switch-wrapper">
+    <slot />
+    <label for="switch" class="relative block rounded-full w-12 h-6 border-2 border-gray-700 cursor-pointer transition duration-200" :class="{ 'bg-teal-700': modelValue, 'bg-gray-800': !modelValue }">
+      <div class="w-1/2 absolute left-0 top-0 block h-full bg-teal-500 rounded-full transition duration-200 transform" :class="{ 'translate-x-full': modelValue }"></div>
+    </label>
+    <input type="checkbox" class="invisible w-0 h-0 absolute pointer-events-none" name="switch" id="switch" :value="modelValue" @input="$emit('update:modelValue', !modelValue)" />
+  </div>
 </template>
 
 <script>
 export default {
+  name: 'Toggle',
+  emits: ['update:modelValue'],
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
-      default: false
+      default: false,
     },
   },
 }
 </script>
-
-<style lang="postcss" scoped>
-.switch {
-  visibility: hidden;
-  width: 0;
-  height: 0;
-  position: absolute;
-  pointer-events: none;
-}
-.switch-label {
-  transition: 0.2s ease;
-  @apply relative block rounded-full w-12 h-6 bg-gray-800 border-2 border-gray-700 cursor-pointer;
-}
-.switch-button {
-  width: 50%;
-  transition: 0.2s ease;
-  @apply absolute left-0 top-0 block h-full bg-pink-500 rounded-full;
-}
-.switch-label.active {
-  @apply bg-purple-800;
-}
-.switch-label.active .switch-button {
-  transform: translateX(100%);
-}
-</style>

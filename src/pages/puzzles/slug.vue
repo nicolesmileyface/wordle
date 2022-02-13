@@ -20,7 +20,7 @@
               <div class="square w-8 border border-gray-700 rounded font-black text-white flex items-center justify-center" v-for="(letter, j) of word.word" :key="[letter, j].join()"></div>
             </router-link>
             <button v-else-if="word.isFleurdle && word.solved" class="flex flex-wrap gap-[0.125rem] focus:outline-none focus:ring hover:bg-blue-800 transition duration-300 rounded">
-              <div class="square w-8 border border-gray-700 bg-teal-700 rounded font-black text-white flex items-center justify-center" v-for="(letter, j) of word.word" :key="[letter, j].join()">{{ letter }}</div>
+              <div :class="{ 'bg-teal-700': !word.lost, 'bg-orange-700': word.lost }" class="square w-8 border border-gray-700 rounded font-black text-white flex items-center justify-center" v-for="(letter, j) of word.word" :key="[letter, j].join()">{{ letter }}</div>
             </button>
             <p v-else class="text-xl">{{ word.word }}</p>
           </div>
@@ -85,6 +85,14 @@ export default {
           localStorage.setItem(`puzzle-${route.params.slug}`, JSON.stringify(state.puzzle))
         } else {
           state.puzzle = JSON.parse(progress)
+          state.puzzle = state.puzzle.map((entry, i) => {
+            entry.lost = false
+            const individualProgressStr = localStorage.getItem(`game-state-puzzle-${route.params.slug}-${i}`)
+            if (individualProgressStr) {
+              entry.lost = JSON.parse(individualProgressStr)?.results?.solved === -1
+            }
+            return entry
+          })
         }
       } catch (error) {
         console.log(error)

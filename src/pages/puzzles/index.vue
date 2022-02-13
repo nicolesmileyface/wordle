@@ -7,12 +7,12 @@
         </router-link>
         <h1 class="text-2xl sm:text-4xl text-gray-200 font-black tracking-wider text-center">Puzzles</h1>
         <router-link to="/puzzles/editor">
-          <PencilAltIcon class="w-6 h-6" />
+          <PencilAltIcon class="w-6 h-6 animate-pulse" />
         </router-link>
       </header>
     </template>
     <template #content>
-      <div class="grid gap-16 w-full py-6">
+      <div class="grid gap-16 w-full py-6" v-if="state.inProgress.length || state.completed.length || state.notStarted.length">
         <div class="space-y-4" v-if="state.inProgress.length">
           <h3 class="text-2xl font-medium">In Progress</h3>
           <div class="grid grid-cols-2 gap-4">
@@ -44,6 +44,8 @@
           </div>
         </div>
       </div>
+      <div v-else-if="state.loading">loading...</div>
+      <div v-else>no puzzles yet!</div>
     </template>
   </FLDefaultLayout>
   <textarea name="template" id="" class="sr-only whitespace-pre-wrap" aria-hidden ref="clipboardEl" :value="state.url" />
@@ -71,6 +73,7 @@ export default {
 
     const load = async () => {
       try {
+        state.loading = true
         const data = (
           await fetch(window.location.origin + '/.netlify/functions/fleurdle-puzzle/api/puzzles', {
             headers: { 'Content-Type': 'application/json' },
@@ -94,8 +97,10 @@ export default {
         state.notStarted = data.filter((a) => a.progress === -1)
         state.inProgress = data.filter((a) => a.progress === 0)
         state.completed = data.filter((a) => a.progress === 1)
+        state.loading = false
       } catch (error) {
         console.log(error)
+        state.loading = false
       }
     }
 

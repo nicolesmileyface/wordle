@@ -1,10 +1,10 @@
-const express = require('express')
-const { generateSlug } = require("random-word-slugs")
-const { nanoid } = require('nanoid')
+import express from 'express'
+import { generateSlug } from "random-word-slugs"
+import { nanoid } from 'nanoid'
 const router = express.Router()
 
 
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 const Puzzle = mongoose.model('Puzzle', new Schema({
@@ -13,6 +13,7 @@ const Puzzle = mongoose.model('Puzzle', new Schema({
   description: String,
   author: String,
   puzzle: Array,
+  isPublic: Boolean
 }))
 
 const filterProperties = (puzzle) => ({
@@ -21,6 +22,7 @@ const filterProperties = (puzzle) => ({
   description: puzzle.description,
   author: puzzle.author,
   puzzle: puzzle.puzzle,
+  isPublic: puzzle.isPublic
 })
 
 router.get('/health', async (req, res) => {
@@ -29,7 +31,7 @@ router.get('/health', async (req, res) => {
 
 router.get('/puzzles', async (req, res) => {
   try {
-    const puzzles = await Puzzle.find()
+    const puzzles = await Puzzle.find({ isPublic: true })
     res.send(puzzles.map(filterProperties))
   } catch (error) {
     res.status(500).send(error)
@@ -55,12 +57,12 @@ router.get('/puzzles/:slug', async (req, res) => {
 
 router.post('/puzzles', async (req, res) => {
   try {
-    let { slug, puzzle, title, author, description } = req.body
+    let { slug, puzzle, title, author, description, isPublic } = req.body
     if(!puzzle) {
       res.status(400).send({ error: 'Missing params' })
       return
     }
-    console.log({ slug, puzzle, title, author, description })
+    console.log({ slug, puzzle, title, author, description, isPublic })
     if(!Array.isArray(puzzle) || puzzle.some(word => {
       if(!word.word) return true
       if(word.isFleurdle === undefined) return true
@@ -84,7 +86,8 @@ router.post('/puzzles', async (req, res) => {
       title: title || slug,
       author: author || '',
       description: description || '',
-      puzzle
+      puzzle,
+      isPublic: isPublic === undefined ? true : isPublic
     })
     console.log({result})
     await result.save().catch(() => { throw new Error('couldnt save')})
@@ -95,4 +98,38 @@ router.post('/puzzles', async (req, res) => {
   }
 })
 
-module.exports = { router }
+router.delete('/puzzles/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params
+    if(req.headers.authorization !== process.env.ADMIN_KEY) {
+      res.status(401).send({ error: 'Not Authorized' })
+      return
+    }
+    let puzzle = await Puzzle.findOneAndDelete({ slug }).exec()
+    if (!puzzle) {
+      puzzle = await Puzzle.findOneAndDelete({ _id: slug }).exec()
+      if (!puzzle) {
+        res.status(400).send({ error: `Puzzle matching "${slug}" does not exist` })
+        return
+      }
+    }
+    res.send(filterProperties(puzzle))
+  } catch (error) {
+    res.status(500).send(error)
+  }
+})
+
+router.delete('/puzzles', async (req, res) => {
+  try {
+    if(req.headers.authorization !== process.env.ADMIN_KEY) {
+      res.status(401).send({ error: 'Not Authorized' })
+      return
+    }
+    const puzzle = await Puzzle.deleteMany({}).exec()
+    res.send(filterProperties(puzzle))
+  } catch (error) {
+    res.status(500).send(error)
+  }
+})
+
+export { router }

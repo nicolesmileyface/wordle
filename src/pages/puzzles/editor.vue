@@ -61,15 +61,26 @@
         </div>
         <div class="w-full h-px bg-gray-600" v-if="state.puzzleOutput.length"></div>
         <div class="space-y-4" v-if="state.puzzleOutput.length && !state.slug">
-          <div class="flex space-x-4">
-            <label class="block space-y-1 w-full">
-              <p>title</p>
-              <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="state.title" />
-            </label>
-            <label class="block space-y-1 w-full">
-              <p>author</p>
-              <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="state.author" />
-            </label>
+          <div class="space-y-2">
+            <p>Fleurdle Properties:</p>
+            <p class="text-xs text-gray-500">All properties are optional, if title is omitted a random title will be chosen</p>
+          </div>
+          <div class="space-y-2">
+            <div class="flex space-x-4 items-center">
+              <label class="block space-y-1 w-full">
+                <p>title</p>
+                <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="state.title" />
+              </label>
+              <label class="block space-y-1 w-full">
+                <p>author</p>
+                <input type="text" class="w-full appearance-none block bg-transparent px-4 py-2 rounded border border-gray-500" v-model="state.author" />
+              </label>
+              <label class="block space-y-1 w-max">
+                <p>public</p>
+                <Toggle v-model="state.isPublic" class="py-2 border border-transparent m-auto" />
+              </label>
+            </div>
+            <p class="text-xs text-gray-500">Only public puzzles are available on the puzzle page</p>
           </div>
           <label class="block space-y-1 w-full">
             <p>description</p>
@@ -100,9 +111,10 @@ import { computed, reactive, ref } from '@vue/reactivity'
 import FLDefaultLayout from '../../components/FLDefaultLayout.vue'
 import { HomeIcon, ShareIcon, ChevronLeftIcon } from '@heroicons/vue/outline'
 import { nextTick } from '@vue/runtime-core'
+import Toggle from '../../components/basic/Toggle.vue'
 export default {
   name: 'PuzzleEditor',
-  components: { FLDefaultLayout, HomeIcon, ShareIcon, ChevronLeftIcon },
+  components: { FLDefaultLayout, HomeIcon, ShareIcon, ChevronLeftIcon, Toggle },
   setup() {
     const state = reactive({
       puzzleInput: '',
@@ -112,6 +124,7 @@ export default {
       author: '',
       url: '',
       slug: '',
+      isPublic: true,
       loading: false,
       error: '',
       copiedMessage: false,
@@ -167,6 +180,7 @@ export default {
             slug: slugify(state.title, { lower: true }),
             description: state.description,
             author: state.author,
+            isPublic: state.isPublic,
             puzzle: state.puzzleOutput.map((entry) => ({ word: entry.word, isFleurdle: entry.isFleurdle })),
           }),
         }).then((response) => response.json())
